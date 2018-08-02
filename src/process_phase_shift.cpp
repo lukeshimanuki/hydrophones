@@ -28,7 +28,7 @@ static const uint64_t frequencies[] = {
 };
 static const int8_t  num_frequencies = sizeof(frequencies) / sizeof(uint64_t);
 
-static constexpr const uint64_t sine_wave_size = 400;
+static constexpr const uint64_t sine_wave_size = 64;
 
 static int16_t real_kern[num_frequencies][sine_wave_size][block_size] __attribute__ ((aligned (64)));
 static int16_t imag_kern[num_frequencies][sine_wave_size][block_size] __attribute__ ((aligned (64)));
