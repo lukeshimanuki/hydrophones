@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <Arduino.h>
+//#include <Arduino.h>
 
 #include "global.hpp"
 #include "fxpt_atan2.hpp"
@@ -17,7 +17,7 @@
 static constexpr const int16_t B8 = 1 << 8;
 static constexpr const int32_t B16 = 1 << 16;
 
-static constexpr const uint64_t window = 1996000; // in us
+static constexpr const uint64_t window = 1900000; // in us
 static constexpr const uint32_t threshold = 0;
 
 static const uint64_t frequencies[] = {
@@ -28,7 +28,7 @@ static const uint64_t frequencies[] = {
 };
 static const int8_t  num_frequencies = sizeof(frequencies) / sizeof(uint64_t);
 
-static constexpr const uint64_t sine_wave_size = 64;
+static constexpr const uint64_t sine_wave_size = 400;
 
 static int16_t real_kern[num_frequencies][sine_wave_size][block_size] __attribute__ ((aligned (64)));
 static int16_t imag_kern[num_frequencies][sine_wave_size][block_size] __attribute__ ((aligned (64)));
@@ -40,8 +40,8 @@ void init_process() {
 	int16_t ncos_buf[sine_wave_size];
 	for (uint64_t i = 0; i < sine_wave_size; ++i) {
 		const float angle = 2 * M_PI * i / sine_wave_size;
-		sin_buf[i] = sin(angle) * B16 / 2;
-		ncos_buf[i] = -cos(angle) * B16 / 2;
+		sin_buf[i] = sin(angle) * B16 / 4;
+		ncos_buf[i] = -cos(angle) * B16 / 4;
 	}
 
 	for (uint8_t f = 0; f < num_frequencies; ++f) {
@@ -131,8 +131,10 @@ const char* process(int16_t (* const in)[block_size]) {
 			const int32_t real_part = dot(in[c], real_kern[f][wave_idx]);
 			const int32_t imag_part = dot(in[c], imag_kern[f][wave_idx]);
 
-			real[f][c] = (real[f][c] + real_part)/2;//signed_halving_add_16_and_16(real[f][c], real_part);
-			imag[f][c] = (imag[f][c] + imag_part)/2;//signed_halving_add_16_and_16(imag[f][c], imag_part);
+			//real[f][c] = (real[f][c] + real_part)/2;//signed_halving_add_16_and_16(real[f][c], real_part);
+			//imag[f][c] = (imag[f][c] + imag_part)/2;//signed_halving_add_16_and_16(imag[f][c], imag_part);
+			real[f][c] = real_part;//signed_halving_add_16_and_16(real[f][c], real_part);
+			imag[f][c] = imag_part;//signed_halving_add_16_and_16(imag[f][c], imag_part);
 		}
 	}
 
@@ -188,7 +190,7 @@ const char* process(int16_t (* const in)[block_size]) {
 						float(2*time_diffs[2] -(time_diffs[2]-time_diffs[1]))
 					) / (2 * M_PI) * 360)
 				);
-				
+
 				max_amplitude[f] = 0;
 				max_time[f] = time;
 
